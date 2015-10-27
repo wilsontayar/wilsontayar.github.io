@@ -1,0 +1,62 @@
+---
+layout: post
+title: How to link containers in docker
+date: 2015-02-26 04:46:01.000000000 -03:00
+type: post
+published: true
+status: publish
+categories:
+- Technology
+tags:
+- devops
+- docker
+- mongodb
+- node
+- shell
+---
+<p>This time we are going to see how to setup a mongodb image in the same docker environment as your app and how to link them together, so your app can connect to it!</p>
+<hr />
+<p>For education purposes, I've created a very simple app in node to test this kind of stuff. You can find it in <a title="node-mongo-sample" href="https://github.com/wilsontayar/node-mongo-sample" target="_blank">here</a>.</p>
+<p>This app does not use any external packages beyond the mongodb native driver from npm. Also, the Dockerfile contains everything to set up your image, including downloading references.</p>
+<p>If you are new to docker and want to know a little bit more about Dockerfiles, <a title="Using docker to ship your app" href="{{ site.baseurl }}/2014/09/using-docker-to-ship-your-app/" target="_blank">this post</a> can help you.</p>
+<hr />
+<p>So, first of all, let's start a new mongo container and name it "mongo".</p>
+<pre>docker run -d --name mongo mongo</pre>
+<blockquote><p>If it's your first time running a mongo container, docker will automatically pull the image from the <a href="https://registry.hub.docker.com/" target="_blank">official image registry</a>. Don't worry.</p></blockquote>
+<p>The "-d" param means we want it to run in the background. If you don't explicit tell docker to do that it'll just start the container on your current terminal session until you exit.</p>
+<p>After everything is set up you can check if your container is running by typing:</p>
+<pre>docker ps</pre>
+<p>If you see a mongodb container running like in the image below, great!</p>
+<p><a href="{{ site.baseurl }}/assets/mongo_running.jpg"><img class="size-full wp-image-871" src="{{ site.baseurl }}/assets/mongo_running.jpg" alt="mongo container running" width="718" height="56" /></a> mongo container running</p>
+<p>&nbsp;</p>
+<p>Now let's clone the app repository, normal git stuff:</p>
+<pre>git clone https://github.com/wilsontayar/node-mongo-sample.git</pre>
+<p>And build the image from the dockerfile:</p>
+<pre>cd node-mongo-sample
+docker build -t wilsontayar/node-mongo-sample .</pre>
+<p>This will probably take some time.</p>
+<p>Docker is now downloading the base image, applying the dockerfile commands, downloading dependencies from npm and everything...</p>
+<blockquote><p>If you don't like the git clone part, just type in:</p>
+<pre>docker pull wilsontayar/node-mongo-sample</pre>
+<p>This way you'll pull the image <a href="https://registry.hub.docker.com/u/wilsontayar/node-mongo-sample/" target="_blank">directly from the official registry</a> without the need to download sources and build the dockerfile.</p></blockquote>
+<p>After that, you can finally run the container:</p>
+<pre>docker run -d -p 3000:3000 --link mongo:mongo --name sample wilsontayar/node-mongo-sample</pre>
+<p>The important part is that "--link mongo:mongo" right there.</p>
+<p>When you use this, docker will either use some environment variables inside your container OR update your container's /etc/hosts file telling that "mongo = x.x.x.x", where x.x.x.x is the internal ip to your mongodb's container.</p>
+<p>And now you're done!</p>
+<p>To test the app just navigate to localhost:3000 (if you're using boot2docker, remember to use "boot2docker ip", not localhost), type in a message and press enter to submit the form.</p>
+<hr />
+<p>&nbsp;</p>
+<p>The correct "link" syntax is as follows:</p>
+<pre>--link &lt;name&gt;:alias</pre>
+<p>Where name is the name of the container you wish to link (remember the "--name mongo" we used earlier?) and alias is what you will tell your application, so the connection can be successful.</p>
+<blockquote><p>To know more about linking containers, <a href="https://docs.docker.com/userguide/dockerlinks/" target="_blank">take a look at the docker user guide here</a>.</p></blockquote>
+<p>If you take a look at our app.js, specifically at the getConfiguration function, you can see that I did this:</p>
+<pre>process.env.NODE_ENV == "production" ? "mongodb://mongo/node-mongo-sample" : "mongodb://localhost:27017/node-mongo-sample"</pre>
+<p>So, if the NODE_ENV variable is set to production, our mongodb native driver will connect to the "mongo" server. That's our alias from the linking magic.</p>
+<p>We are setting the NODE_ENV variable in our Dockerfile, this way:</p>
+<pre>ENV NODE_ENV production</pre>
+<p>&nbsp;</p>
+<p>Well, that's it for now!</p>
+<p>Bye,</p>
+<p>Wilson Tayar</p>

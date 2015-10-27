@@ -1,0 +1,94 @@
+---
+layout: post
+title: Gerenciamento de rotas na URL em Single Page Apps (SPA)
+date: 2013-11-02 00:39:16.000000000 -02:00
+type: post
+published: true
+status: publish
+categories:
+- Technology
+tags:
+- javascript
+- single page apps
+---
+<p>Uma <em>Single Page Application</em>, também conhecida por SPA, possui algumas características bem distintas se a compararmos com outros <em>web apps</em> que estamos acostumados a desenvolver.<br />
+Sua principal característica é o fato de ser uma única página que carrega outros conteúdos dinamicamente com chamadas AJAX, enquanto que o mais comum é encontrarmos aplicativos que solicitam páginas inteiras ao servidor, ou seja, com &lt;head&gt;, &lt;body&gt; e os demais elementos que a compõem.</p>
+<p>Uma prática que vem se tornando cada vez mais comum é o uso de URLs com hash ("#") para "marcar" o conteúdo que foi carregado na <em>Single Page App</em>. Ao utilizarmos esta prática facilitamos a navegação do usuário, pois possibilitamos que o botão voltar do navegador funcione, além de deixarmos a app funcionando como se fosse um site comum. Para quem quer um exemplo, vale gastar alguns minutos navegando no <a title="Grooveshark" href="http://grooveshark.com" target="_blank">Grooveshark</a> e prestar atenção nas URLs com "#!" (hashbang). Vale dizer também que apesar do uso da "#" ser uma prática comum ela não é obrigatória, ou seja, você também pode fazer sua SPA com rotas normais (/rota, por exemplo).</p>
+<p>Neste post, pretendo mostrar duas <em>libraries</em> em javascript que já utilizei em alguns projetos para o gerenciamento e funcionamento das rotas de uma SPA. No final do post também listei alguns nomes muito bons para ajudar quem está procurando outras alternativas.</p>
+<h2>Sammy.js</h2>
+<p>O <a title="Sammy.js / A Small Web Framework with Class / RESTFul Evented JavaScript" href="http://sammyjs.org/" target="_blank">Sammy.js</a> é, como a própria descrição de seu <a href="https://github.com/quirkey/sammy#description" target="_blank">repo no github</a> diz:</p>
+<blockquote><p>"um framework pequeno construído sobre o jQuery e inspirado no Sinatra do Ruby".</p></blockquote>
+<p>Ele se destaca por ser muito simples e ter diversas funcionalidades muito úteis. Aqui estão algumas delas:</p>
+<ul>
+<li>Criar rotas utilizando <em>regular expression</em></li>
+<li>Rotas com parâmetros</li>
+<li>Vincular funções específicas para certas rotas</li>
+<li>Carregar e criar <em>templates</em></li>
+<li>Controle de sessão próprio</li>
+</ul>
+<p>Para utilizá-lo é simples, como mostrado no código abaixo, retirado da <a href="http://sammyjs.org/intro#how" target="_blank">página de introdução do framework</a>:</p>
+<pre>// define a new Sammy.Application bound to the #main element selector
+Sammy('#main', function() {
+
+  // define a 'get' route that will be triggered at '#/path'
+  this.get('#/path', function() {
+    // this context is a Sammy.EventContext
+    this.$element() // $('#main')
+        .html('A new route!');
+  });
+}).run();</pre>
+<p>Basta indicarmos em qual <em>container</em> serão carregadas todas as rotas (#main no exemplo acima) e logo depois passarmos uma rota ("#/path") e uma função que será executada sempre que ele reconhecer a rota na URL.</p>
+<p>Vocês podem conferir um tutorial muito bom sobre diversas funcionalidades do Sammy.js no site oficial: <a href="http://sammyjs.org/docs#tutorials">http://sammyjs.org/docs#tutorials</a>.</p>
+<p><span style="color: #999999;">Como dica, a inicialização das rotas do Sammy pode ficar um pouco "macarrônico" dependendo da estrutura e complexidade da sua app. Tente sempre manter o funcionamento das rotas o mais simples possível chamando initializers de outras funções para posicionar tudo em sua página.</span></p>
+<h2>Pagerjs</h2>
+<p>O <a href="http://pagerjs.com/" target="_blank">Pagerjs</a> é uma <em>library</em> baseada em jQuery e <a href="http://knockoutjs.com/" target="_blank">knockout</a>. Com <a href="http://pagerjs.com/demo/" target="_blank">uma página de demonstração que deixa qualquer um com vontade de usá-la alguma vez na vida</a>, ela possui diversas features que facilitam a vida do desenvolvedor na hora de fazer <em>mapping</em> entre suas <em>view models</em>. Acredito que o pagerjs seja a melhor escolha para quem já utiliza o knockout (confiram o <a href="https://github.com/finnsson/pagerjs" target="_blank">repo do github aqui</a>).</p>
+<p>Vamos analisar juntos o código abaixo, retirado de alguns trechos da página de demonstração:</p>
+<pre>
+&lt;html&gt;
+&lt;body&gt;
+&lt;div class="container" style="padding-top: 30px;"&gt;
+
+    &lt;!-- #!/first-page --&gt;
+    &lt;div data-bind="page: {id: 'first-page'}"&gt;
+
+        &lt;!-- #!/first-page/details --&gt;
+        &lt;div data-bind="page: {id: 'details'}"&gt;
+
+        &lt;/div&gt;
+
+    &lt;/div&gt;
+
+    &lt;!-- #!/another-page --&gt;
+    &lt;div data-bind="page: {id: 'another-page'}"&gt;
+
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<pre>
+  // use #!/ instead of the default #
+  pager.Href.hash = '#!/';
+
+  // extend your view-model with pager.js specific data
+  pager.extendWithPage(viewModel);
+
+  // apply the view-model using KnockoutJS as normal
+  ko.applyBindings(viewModel);
+
+  // start pager.js
+  pager.start();
+</pre>
+<p>Basicamente, o Pagerjs se junta à sua <em>view model</em> (através do extendWithPage) e cria algumas propriedades dele. Desta forma, você consegue fazer o <em>bind</em> via knockout das rotas para <em>containers</em> da sua página.</p>
+<p>São tantas as funcionalidades do Pagerjs que fica difícil escrever um pouco sobre todas elas. Convido os interessados a explorar melhor a página de demonstração e sentir na pele a facilidade que os <em>bindings</em> trazem.</p>
+<p><span style="color: #999999;">A diferença básica do pagerjs para o sammy.js é que o sammy mapeia a sua rota para funções que tem o trabalho de carregar as <em>views</em>, enquanto que com o pagerjs, suas rotas estão ligadas com <em>bindings</em> ao seu HTML. Não podemos esquecer que o Pagerjs foi criado para ser uma extensão do uso normal do knockout. Caso você estiver lidando com projetos pequenos, mantenha tudo simples e não crie dependências de <em>frameworks</em> inteiros apenas para ter a flexibilidade das rotas. Para isso existem outras <em>libraries</em> que não dependem de <em>frameworks</em>.</span></p>
+<h2>Outras opções</h2>
+<p>Para quem está procurando gerenciar suas rotas, aqui estão mais algumas boas alternativas:</p>
+<ul>
+<li><a href="http://millermedeiros.github.io/crossroads.js/" target="_blank">Crossroads.js</a> - criada pelo brasileiro <a href="http://blog.millermedeiros.com/" target="_blank">Miller Medeiros</a> é uma ótima escolha para qualquer projeto, já que não depende de nenhum framework. Sua única dependência é do JS-Signals, também desenvolvido por ele.</li>
+<li><a href="http://mtrpcic.github.io/pathjs/" target="_blank">pathjs</a> - extremamente pequena, também não depende de nenhum framework. Já não é atualizada no github há algum tempo.</li>
+<li><a href="http://davisjs.com/" target="_blank">Davis.js</a> - muito parecida com o sammy.js, já que também é baseada no Sinatra. Depende do jQuery para que tudo funcione.</li>
+</ul>
+<p>&nbsp;</p>
+<p>Abraços!</p>
+<address>Wilson Tayar</address>

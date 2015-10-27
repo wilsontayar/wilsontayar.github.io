@@ -1,0 +1,80 @@
+---
+layout: post
+title: Using docker to ship your app
+date: 2014-09-13 00:59:38.000000000 -03:00
+type: post
+published: true
+status: publish
+categories:
+- Technology
+tags:
+- devops
+- docker
+- node
+- shell
+---
+<p>Hey, it's been a long time since the last post. Guess it's time to clear out the dust and start from scratch.</p>
+<hr />
+<p>Well, in the past few months one of the things I've been studying is docker, just to see what the buzz was all about. And it's awesome. :)</p>
+<p>In this post I'll try to show you guys how to "dockerize" your app. And by "dockerize" I mean to put it inside a container, where you can include all your app dependencies as well, and finally start hosting it in your favourite cloud provider.</p>
+<hr />
+<p>The app we'll dockerize is just a hello world written in node.js (without any dependencies for now). Also, it's answering calls on http://127.0.0.1:8000, as shown in the gist below:</p>
+<pre>
+  var http = require('http');
+
+  var server = http.createServer(function (req, res) {
+    res.end("Hello World");
+  });
+
+  server.listen(8000);
+</pre>
+<p>Now we'll create another file named "Dockerfile". This is where you tell docker your "container recipe", so it knows what to do in the build process:</p>
+<pre>
+  FROM ubuntu
+
+  RUN sudo apt-get update
+  RUN sudo apt-get install curl -y
+  RUN curl -sL https://deb.nodesource.com/setup | sudo bash -
+  RUN sudo apt-get install nodejs -y
+
+  ADD . /src
+
+  EXPOSE 8000
+  CMD ["node", "/src/app.js"]
+</pre>
+<p>Let's take a closer look at it:</p>
+<pre>FROM ubuntu</pre>
+<p>Docker will pull the ubuntu repository (or use the local copy if you have it) to use as the base image, meaning that every line below will be applied to it.</p>
+<pre id="file-dockerfile-LC3" class="line">RUN sudo apt-get update
+RUN sudo apt-get install curl -y
+RUN curl -sL https://deb.nodesource.com/setup <span class="p">|</span> sudo bash -
+RUN sudo apt-get install nodejs -y</pre>
+<p>RUN is used to send shell commands to the base image. In here we're telling it to update the apt-get repos, install curl, use curl to register node's source and install node.</p>
+<pre>ADD . /src</pre>
+<p>Then we'll copy all the files from your current Dockerfile's path to the image's /src. In this case we are moving our app.js to /src/app.js.</p>
+<pre>EXPOSE 8000</pre>
+<p>Tell the container to listen to port 8000, note that this is the same port that our app.js is using.</p>
+<pre>CMD <span class="o">[</span><span class="s2">"node"</span>, <span class="s2">"/src/app.js"</span><span class="o">]</span></pre>
+<p>CMD will execute a command, but it can only be used once. It's purpose is to tell the "default" way to get things running. In this line we're telling node to start our /src/app.js.</p>
+<blockquote><p>If you wish to know what else can be done in the Dockerfile or the full reference of the commands shown above, the <a title="Dockerfile reference" href="https://docs.docker.com/reference/builder/">Dockerfile reference</a> has it all.</p></blockquote>
+<hr />
+<p>K, so now it's time to tell docker you'd like to build a container. If you're using Windows or Mac OS you'll need boot2docker, which is the way I'm going to show in here. If you're a linux user just follow the steps after the boot2docker commands and you'll be fine.</p>
+<p>After installing boot2docker (if you haven't installed it already, check out <a title="docker official website" href="https://www.docker.com/" target="_blank">docker's website</a> to see your OS installation method), open your terminal and type:</p>
+<pre>boot2docker init</pre>
+<p>This will install boot2docker's image in your vmware, and you'll only need to run this once. After everything gets set up and the terminal starts responding again, type:</p>
+<pre>boot2docker start</pre>
+<p>This will give you some instructions on how to access docker. If you're on Windows, it will probably tell you to ssh the vm directly. If you're on Mac OS, it will give you a shell variable that you'll need to set things up. The IP address in this command is your way of accessing anything that is running inside boot2docker's vm (aka your containers). After following the instructions, let's move on:</p>
+<pre>cd path/to/your/app.js
+docker build -t username/container-name .</pre>
+<p>In here, after navigating to our app's directory we tell docker to build our container. The -t means we want to tag this container as "username/container-name". The dot at the end is needed, and it's telling docker to use the current directory's Dockerfile.</p>
+<p>And that's it, you have just built your first container!</p>
+<blockquote><p>To check it out, you can type "docker images" to get a list of all your current images.</p></blockquote>
+<p>To run it, just type:</p>
+<pre>docker run -p 49491:8000 -d username/container-name</pre>
+<p>So, with "-p" we basically mapped everything that comes in the host's 49491 port to the container's 8000 exposed port. The "-d" was used to tell docker that we want it to run in the background.</p>
+<p>To access our app, type "boot2docker ip" to get the vm's IP address, open your favourite browser and type "INSERT_IP_HERE:49491" to see the "Hello World" message.</p>
+<hr />
+<p>&nbsp;</p>
+<p>Well, that was it. Hope you guys enjoyed this as much as I did. :)</p>
+<p>Bye,</p>
+<p>Wilson Tayar</p>
