@@ -4,8 +4,6 @@ title: About
 permalink: /about/
 ---
 
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](http://jekyllrb.com/)
+![Wilson Tayar](https://pbs.twimg.com/profile_images/553176032102998017/m3m5w3Mh_200x200.jpeg){: style="margin: 0 auto;"}
 
-You can find the source code for the Jekyll new theme at: [github.com/jglovier/jekyll-new](https://github.com/jglovier/jekyll-new)
-
-You can find the source code for Jekyll at [github.com/jekyll/jekyll](https://github.com/jekyll/jekyll)
+Technology enthusiast and dreamer entrepreneur. Just another software developer who spends his free time between friends, games, coffee and a good read.
