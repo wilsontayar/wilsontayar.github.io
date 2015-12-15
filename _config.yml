@@ -1,26 +1,19 @@
-# Site settings
-title: Wilson Tayar
-tagline: //<a href='http://twitter.com/wilsontayar'>@wilsontayar</a>
-description: > # this means to ignore newlines until "baseurl:"
-  Follow me <a href='http://twitter.com/wilsontayar'>@wilsontayar</a>
-
-baseurl: "" # the subpath of your site, e.g. /blog/
-url: "http://wilsontayar.com" # the base hostname & protocol for your site
-
-twitter_username: wilsontayar
-github_username:  wilsontayar
-email: wilsontayar at hotmail dot com
-
-paginate: 1
-
-# Build settings
-markdown: kramdown
-
 # Permalinks
 #
 # Use of `relative_permalinks` ensures post links from the index work properly.
-permalink:           pretty
-relative_permalinks: true
+permalink:           :categories/:title
+
+# Site settings
+title: Wilson Tayar
+tagline: //@wilsontayar
+description: Follow me <a href='https://twitter.com/wilsontayar'>@wilsontayar</a>
+
+url: http://www.wilsontayar.com
+
+author:
+  name: Wilson Tayar
+  url: https://twitter.com/wilsontayar
+email: wilsontayar at hotmail dot com
 
 # Custom vars
 version:             1.0.0
